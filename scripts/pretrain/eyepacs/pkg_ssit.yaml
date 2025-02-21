@@ -1,0 +1,71 @@
+defaults:
+  - _self_
+  - augmentations: asymmetric.yaml
+  - wandb: private.yaml
+  - override hydra/hydra_logging: disabled
+  - override hydra/job_logging: disabled
+
+# disable hydra outputs
+hydra:
+  output_subdir: null
+  run:
+    dir: .
+
+name: "pkg-ssit-vit-eyepacs-clip-datacomp_xl_s13b_b90k-pkg1.0-ss10-st0.5"
+method: "pkg_ssit"
+backbone:
+  name: "vit_base"
+method_kwargs:
+  proj_hidden_dim: 4096
+  proj_output_dim: 256
+  pred_hidden_dim: 4096
+  patch_size: 16
+  temperature: 0.2
+  saliency_threshold: 0.5
+  segmentation_weight: 1
+momentum:
+  base_tau: 0.99
+  final_tau: 1.0
+data:
+  dataset: eyepacs
+  train_path: "/path/to/eyepacs/pretrain/pickle_file" # please follow https://github.com/YijinHuang/SSiT to build the pickle file
+  val_path: None
+  format: "ssit"
+  num_workers: 16
+optimizer:
+  name: "adamw"
+  batch_size: 256
+  lr: 3.0e-4
+  classifier_lr: 3.0e-4
+  weight_decay: 0.1
+scheduler:
+  name: "warmup_cosine"
+checkpoint:
+  enabled: True
+  dir: "trained_models"
+  frequency: 1
+auto_resume:
+  enabled: False
+
+# overwrite PL stuff
+max_epochs: 300
+devices: [0, 1]
+sync_batchnorm: True
+accelerator: "gpu"
+strategy: "ddp"
+precision: 16-mixed
+
+prior_knowledge:
+  weight_start: 1.0
+  weight_end: 1.0
+  weight_update: "none"
+  clip_arch: "CLIP"
+  clip_pretrained_source: "datacomp_xl_s13b_b90k"
+  # datacomp_xl_s13b_b90k, dfn2b, laion2b_s34b_b88k, openai, laion400m_e32
+  debias_factor: 1.0
+  counterfactual_momentum: 0.999
+  threshold: 0.7
+  masked_counterfactual: False
+  confidence_mask: False
+  marginal_loss: False
+  pkg_labels: ["dr_lesions"]

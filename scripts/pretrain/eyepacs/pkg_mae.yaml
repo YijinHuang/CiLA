@@ -1,0 +1,68 @@
+defaults:
+  - _self_
+  - augmentations: reconstruction.yaml
+  - wandb: private.yaml
+  - override hydra/hydra_logging: disabled
+  - override hydra/job_logging: disabled
+
+# disable hydra outputs
+hydra:
+  output_subdir: null
+  run:
+    dir: .
+
+name: "pkg-mae-eyepacs-clip-datacomp_xl_s13b_b90k-pkg1.0-test"
+method: "pkg_mae"
+backbone:
+  name: "vit_base"
+method_kwargs:
+  decoder_embed_dim: 512
+  decoder_depth: 8
+  decoder_num_heads: 16
+  mask_ratio: 0.5
+  norm_pix_loss: True
+data:
+  dataset: imagenet
+  train_path: "/path/to/eyepacs/folder"
+  format: "image_folder"
+  num_workers: 8
+optimizer:
+  name: "adamw"
+  batch_size: 256
+  lr: 2.0e-4
+  classifier_lr: 2.0e-4
+  weight_decay: 0.05
+  kwargs:
+    betas: [0.9, 0.95]
+scheduler:
+  name: "warmup_cosine"
+  warmup_start_lr: 0.0
+  warmup_epochs: 40
+checkpoint:
+  enabled: True
+  dir: "trained_models"
+  frequency: 1
+auto_resume:
+  enabled: False
+prior_knowledge:
+  weight_start: 0.1
+  weight_end: 1.0
+  weight_update: "cosine"
+  clip_arch: "CLIP"
+  clip_pretrained_source: "datacomp_xl_s13b_b90k"
+  # datacomp_xl_s13b_b90k, dfn2b, laion2b_s34b_b88k, openai, laion400m_e32
+  debias_factor: 1.0
+  counterfactual_momentum: 0.999
+  threshold: 0.7
+  masked_counterfactual: False
+  confidence_mask: False
+  marginal_loss: False
+  pkg_labels: ["dr_lesions"]
+
+# overwrite PL stuff
+max_epochs: 400
+devices: [0, 1]
+sync_batchnorm: True
+accelerator: "gpu"
+strategy: "ddp"
+precision: 16-mixed
