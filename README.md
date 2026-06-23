@@ -1,8 +1,6 @@
 # CiLA: CLIP-informed Lesion Attribute Learning
 
-This is the pytorch implementation of the paper submitted to MICCAI 2026:
-
-> Anonymous, "CiLA: Knowledge-Preserving Self-Supervised Adaptation of CLIP for Fundus Imaging", under review, 2026.
+> Yijin Huang, Pujin Cheng, Roger Tam and Xiaoying Tang, "CiLA: Knowledge-Preserving Self-Supervised Adaptation of CLIP for Fundus Imaging", MICCAI, 2026.
 
 ## Dataset
 
